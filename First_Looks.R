@@ -59,7 +59,8 @@ ggplot(plot_simp, aes(x = contrast, y = estimate, color = condition))+
   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE),
                 width = 0.2,
                 position = position_dodge(0.9))+
-  facet_grid(~condition)
+  facet_grid(~condition)+
+  theme(axis.text.x = element_text(angle = 45,hjust = 1))
 
 
 ## RT
@@ -114,7 +115,9 @@ ggplot(plot_simp_rt, aes(x = contrast, y = estimate, color = condition))+
   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE),
                 width = 0.2,
                 position = position_dodge(0.9))+
-  facet_grid(~condition)
+  facet_grid(~condition)+
+  theme(axis.text.x = element_text(angle = 45,hjust = 1))
+
 
 ############################################################################################################
 
