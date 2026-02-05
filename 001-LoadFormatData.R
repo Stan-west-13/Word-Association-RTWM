@@ -16,6 +16,7 @@ x <- map_dfr(datapath, function(x){
     d_all <- rbind(exp_load,exp_noload) %>%
       left_join(select(condition_df,pp,context = condition),by="pp") %>%
       mutate(participant = as.factor(pp), .after = pp,
+             context = as.factor(context),
              response = as.character(tolower(trimws(str_replace_all(input_textbox.text_raw,"'","")))),
              response = ifelse(gsub("\\n","",response, fixed = TRUE) == "",NA,gsub("\\n","",response, fixed = TRUE)))%>%
       select(-pp) %>%

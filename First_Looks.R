@@ -123,7 +123,7 @@ word_assoc_filt <- responded_trials %>%
   group_by(participant) %>%
   mutate(z_cue_rt = (cue_rt - mean(cue_rt))/sd(cue_rt),
          z_type_dur = (type_dur - mean(type_dur))/sd(type_dur)) %>%
-  filter(abs(z_cue_rt) <= 2.5 & abs(z_type_dur) <= 2.5)
+  filter(abs(z_cue_rt) <= 2 & abs(z_type_dur) <= 2)
 
 glmer_fit <- glmer(
   cue_rt_mili ~ context * condition   + (1 | cue),
@@ -132,6 +132,11 @@ glmer_fit <- glmer(
 )
 
 summary(glmer_fit)
+
+em_condition <- emmeans(glmer_fit,~context|condition)
+pairs(em_condition)
+em_context <- emmeans(glmer_fit,~condition|context)
+pairs(em_context)
 
 glmer_plot_main <-  word_assoc_filt %>%
   group_by(condition,context) %>%
