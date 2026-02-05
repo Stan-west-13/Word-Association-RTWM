@@ -58,7 +58,8 @@ ggplot(plot_simp, aes(x = contrast, y = estimate, color = condition))+
   geom_hline(yintercept = 0,linetype = 2)+
   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE),
                 width = 0.2,
-                position = position_dodge(0.9))
+                position = position_dodge(0.9))+
+  facet_grid(~condition)
 
 
 ## RT
@@ -112,7 +113,8 @@ ggplot(plot_simp_rt, aes(x = contrast, y = estimate, color = condition))+
   geom_hline(yintercept = 0,linetype = 2)+
   geom_errorbar(aes(ymin = estimate - SE, ymax = estimate + SE),
                 width = 0.2,
-                position = position_dodge(0.9))
+                position = position_dodge(0.9))+
+  facet_grid(~condition)
 
 ############################################################################################################
 
@@ -147,7 +149,9 @@ ggplot(glmer_plot_main, aes(x = condition, y = mean, fill = context))+
   geom_col(position = "dodge")+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
                 position = position_dodge(0.9),
-                width = 0.2)
+                width = 0.2)+
+  geom_text(stat = "identity", aes(label = ..y..), vjust = 45,
+            position = position_dodge(0.9))
 
 glmer_plot_type <- word_assoc_filt %>%
   group_by(condition,type,strength_strat,context) %>%
@@ -156,6 +160,4 @@ glmer_plot_type <- word_assoc_filt %>%
 ggplot(glmer_plot_type, aes(x = type, y = mean, fill = strength_strat))+
   geom_col(position = "dodge")+
   facet_grid(context~condition)
-
-
 
