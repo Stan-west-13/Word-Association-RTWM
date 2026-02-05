@@ -6,7 +6,7 @@ library(ggplot2)
 datapath <- list.files(path = "C:/Users/Stan/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
 datapath <- datapath[-73]
 
-
+words_meta <- read.csv("data/stim_64_NNVB.csv")
 
 x <- map_dfr(datapath, function(x){
     exp_load <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]trialstest.csv",full.names = TRUE))[1:32,] 
@@ -40,8 +40,13 @@ x <- map_dfr(datapath, function(x){
              trial_type = as.factor(trial_type),
              square_rt_mili = square_rt * 1000,
              cue_rt_mili = cue_rt * 1000,
-             type_dur_mili = type_dur * 1000)
+             type_dur_mili = type_dur * 1000) %>%
+      left_join(select(words_meta,cue,strength_strat,type), by = "cue")
     return(d_all)
 })
+
+
+
+
 
 saveRDS(x, "data/TTA_metadata.rds")
