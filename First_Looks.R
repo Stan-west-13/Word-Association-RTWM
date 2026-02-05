@@ -123,7 +123,8 @@ word_assoc_filt <- responded_trials %>%
   group_by(participant) %>%
   mutate(z_cue_rt = (cue_rt - mean(cue_rt))/sd(cue_rt),
          z_type_dur = (type_dur - mean(type_dur))/sd(type_dur)) %>%
-  filter(abs(z_cue_rt) <= 2 & abs(z_type_dur) <= 2)
+  filter(abs(z_cue_rt) <= 2 & abs(z_type_dur) <= 2) %>%
+  mutate(context = relevel(context,ref = "peer"))
 
 glmer_fit <- glmer(
   cue_rt_mili ~ context * condition   + (1 | cue),
