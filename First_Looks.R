@@ -60,7 +60,8 @@ ggplot(plot_simp, aes(x = contrast, y = estimate, color = condition))+
                 width = 0.2,
                 position = position_dodge(0.9))+
   facet_grid(~condition)+
-  theme(axis.text.x = element_text(angle = 45,hjust = 1))
+  theme(axis.text.x = element_text(angle = 45,hjust = 1))+
+  geom_text(stat = "identity", aes(label = round(p.value,2)),vjust = 4)
 
 
 ## RT
@@ -116,7 +117,8 @@ ggplot(plot_simp_rt, aes(x = contrast, y = estimate, color = condition))+
                 width = 0.2,
                 position = position_dodge(0.9))+
   facet_grid(~condition)+
-  theme(axis.text.x = element_text(angle = 45,hjust = 1))
+  theme(axis.text.x = element_text(angle = 45,hjust = 1))+
+  geom_text(stat = "identity", aes(label = round(p.value,2)),vjust = 4)
 
 
 ############################################################################################################
@@ -131,8 +133,19 @@ word_assoc_filt <- responded_trials %>%
   filter(abs(z_cue_rt) <= 2 & abs(z_type_dur) <= 2) %>%
   mutate(context = relevel(context,ref = "peer"))
 
+z_pp <- responded_trials %>%
+  filter(cue_rt_mili > 200) %>%
+  group_by(participant) %>%
+  mutate(z_cue_rt = (cue_rt - mean(cue_rt))/sd(cue_rt),
+         z_type_dur = (type_dur - mean(type_dur))/sd(type_dur))
+
+ggplot(z_pp, aes(x = z_cue_rt,fill =context))+
+  geom_histogram(aes(alpha = 0.5))+
+  facet_grid(condition~context)
+
+
 glmer_fit <- glmer(
-  cue_rt_mili ~ context * condition   + (1 | cue),
+  cue_rt_mili ~ context * condition   + (context + condition | cue) + (condition | participant),
   data = word_assoc_filt,
   family = inverse.gaussian("identity")
 )
@@ -153,7 +166,7 @@ ggplot(glmer_plot_main, aes(x = condition, y = mean, fill = context))+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
                 position = position_dodge(0.9),
                 width = 0.2)+
-  geom_text(stat = "identity", aes(label = ..y..), vjust = 45,
+  geom_text(stat = "identity", aes(label = after_stat(y)), vjust = 45,
             position = position_dodge(0.9))
 
 glmer_plot_type <- word_assoc_filt %>%
