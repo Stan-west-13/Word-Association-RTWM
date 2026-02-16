@@ -33,7 +33,8 @@ all_psychling <- full_join(sub,aoa) %>%
 ## Filter out non-responded trials
 responded_trials <- d %>%
   filter(!is.na(response)) %>%
-  left_join(all_psychling)
+  left_join(all_psychling) %>%
+  mutate(nchar = nchar(response))
 
 
 ################ Accuracy and RT for spatial WM task #################################################
@@ -206,8 +207,9 @@ ggplot(word_assoc_filt %>%
                condition,
                aoa,
                Lg10WF,
-               Lg10CD) %>%
-         pivot_longer(cols = c("aoa",starts_with("Lg")),
+               Lg10CD,
+               nchar) %>%
+         pivot_longer(cols = c("aoa",starts_with("Lg"),"nchar"),
                       names_to = "measure",
                       values_to = "value"), aes(x = context, y = value))+
   stat_summary(fun = "mean",geom = "bar")+
@@ -220,8 +222,9 @@ ez_long <- word_assoc_filt %>%
          condition,
          aoa,
          Lg10WF,
-         Lg10CD) %>%
-  pivot_longer(cols = c("aoa",starts_with("Lg")),
+         Lg10CD,
+         nchar) %>%
+  pivot_longer(cols = c("aoa",starts_with("Lg"),"nchar"),
                names_to = "measure",
                values_to = "value") %>%
   drop_na()
@@ -235,8 +238,23 @@ map(ez_split, function(x){
           within = condition,
           between = context,
           data = x)
-  contr <- emmeans_test(x %>% ungroup(), formula = value ~ context)
-  return(list(m,contr))
+  contr_context <- emmeans_test(x %>% ungroup(), formula = value ~ context)
+  contr_condition <-emmeans_test(x %>% ungroup(), formula = value ~ condition)
+  
+ p <- interaction.plot(
+    x.factor = x$condition,
+    trace.factor = x$context,
+    response = x$value,
+    fun = mean,
+    type = "b",
+    col = c("blue", "red","green","purple"),
+    pch = c(19, 17),
+    ylab = paste("Mean",unique(x$measure)),
+    xlab = "Condition",
+    trace.label = "Context")
+
+  return(list(m,contr_context, contr_condition,p))
+  
 })
 
 
