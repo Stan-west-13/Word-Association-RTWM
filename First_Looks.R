@@ -3,14 +3,36 @@ library(dplyr)
 library(emmeans)
 library(lme4)
 library(statmod)
+library(tidyverse)
 library(rstatix)
 
 ## Load data
-d <- readRDS("data/TTA_metadata.rds")
+d <- readRDS("data/TTA_metadata_2026-02-16.rds")
+rsp_map <- readRDS("data/response_map 2.rds")
+sub_map <- readRDS("data/subtlex 1.rds")
+aoa_map <- readRDS("data/kuperman 1.rds")
+
+rsp_map_joined <- rsp_map %>%
+  left_join(select(sub_map,-word), by = c("subtlex_id" = "id")) %>%
+  left_join(select(aoa_map,-word), by = c("kuperman_id" = "id"))
+## Map psychling
+sub <- read.csv("data/SUBTLEXusfrequencyabove1.csv")
+aoa <- read.csv("data/AoA_51715_words.csv")
+all_psychling <- full_join(sub,aoa) %>%
+  select(response = Word,Lg10WF, Lg10CD,aoa = AoA_Kup_lem) %>%
+  rbind(select(rsp_map_joined, response, Lg10CD,Lg10WF, aoa)) %>%
+  unique() %>%
+  rowwise() %>%
+  mutate(sum_na = sum(is.na(c_across(c(Lg10WF,Lg10CD,aoa))))) %>%
+  group_by(response) %>%
+  slice_min(sum_na, n = 1)
+
+
 
 ## Filter out non-responded trials
 responded_trials <- d %>%
-  filter(!is.na(response))
+  filter(!is.na(response)) %>%
+  left_join(all_psychling)
 
 
 ################ Accuracy and RT for spatial WM task #################################################
@@ -176,4 +198,43 @@ glmer_plot_type <- word_assoc_filt %>%
 ggplot(glmer_plot_type, aes(x = type, y = mean, fill = strength_strat))+
   geom_col(position = "dodge")+
   facet_grid(context~condition)
+
+
+ggplot(word_assoc_filt %>%
+        select(context,
+               condition,
+               aoa,
+               Lg10WF,
+               Lg10CD) %>%
+         pivot_longer(cols = c("aoa",starts_with("Lg")),
+                      names_to = "measure",
+                      values_to = "value"), aes(x = context, y = value))+
+  stat_summary(fun = "mean",geom = "bar")+
+  facet_grid(measure~condition, scales= "free_y")
+
+ez_long <- word_assoc_filt %>%
+  select(participant,
+         cue,
+         context,
+         condition,
+         aoa,
+         Lg10WF,
+         Lg10CD) %>%
+  pivot_longer(cols = c("aoa",starts_with("Lg")),
+               names_to = "measure",
+               values_to = "value") %>%
+  drop_na()
+
+ez_split <- split(ez_long,ez_long$measure)
+library(ez)
+
+map(ez_split, function(x){
+  m <- ezANOVA(dv = value,
+          wid = cue,
+          within = condition,
+          between = context,
+          data = x)
+  return(m)
+})
+
 

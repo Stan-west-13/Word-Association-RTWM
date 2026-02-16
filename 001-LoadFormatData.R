@@ -3,7 +3,10 @@ library(tidyr)
 library(purrr)
 library(stringr)
 library(ggplot2)
+#Laptop
 datapath <- list.files(path = "C:/Users/westa/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
+#Work
+#datapath <- list.files(path = "C:/Users/Stan/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
 datapath <- datapath[-73]
 
 words_meta <- read.csv("data/stim_64_NNVB.csv")
@@ -11,7 +14,7 @@ words_meta <- read.csv("data/stim_64_NNVB.csv")
 x <- map_dfr(datapath, function(x){
     exp_load <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]trialstest.csv",full.names = TRUE))[1:32,] 
     exp_noload <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_NO_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]trialstest.csv",full.names = TRUE))[1:32,] 
-    condition_df <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_NO_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].csv",full.names = TRUE))[c(1,10),] %>%
+    condition_df <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].csv",full.names = TRUE))[c(1,10),] %>%
       mutate(pp = as.character(pp))
     d_all <- rbind(exp_load,exp_noload) %>%
       left_join(select(condition_df,pp,context = condition),by="pp") %>%
@@ -50,4 +53,4 @@ x <- map_dfr(datapath, function(x){
 
 
 
-saveRDS(x, "data/TTA_metadata.rds")
+saveRDS(x, paste0("data/TTA_metadata_",Sys.Date(),".rds"))
