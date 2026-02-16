@@ -3,7 +3,7 @@ library(tidyr)
 library(purrr)
 library(stringr)
 library(ggplot2)
-datapath <- list.files(path = "C:/Users/swest19/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
+datapath <- list.files(path = "C:/Users/westa/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
 datapath <- datapath[-73]
 
 words_meta <- read.csv("data/stim_64_NNVB.csv")
