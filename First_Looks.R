@@ -234,7 +234,8 @@ map(ez_split, function(x){
           within = condition,
           between = context,
           data = x)
-  return(m)
+  contr <- emmeans_test(x %>% ungroup(), formula = value ~ context)
+  return(list(m,contr))
 })
 
 
