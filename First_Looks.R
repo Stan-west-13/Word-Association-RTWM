@@ -253,6 +253,7 @@ mods <- map(ez_split, function(x){
     xlab = "Condition",
     trace.label = "Context")
 
+ 
   return(list(m,contr_context, contr_condition,p))
   
 })
