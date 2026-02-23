@@ -65,8 +65,8 @@ x <- map_dfr(datapath, function(x){
              type_dur_mili = type_dur * 1000) %>%
       left_join(select(words_meta,cue,strength_strat,type), by = "cue") %>% 
       group_by(participant) %>% 
-      mutate(counterbalance = ifelse((participant %in% pptracker$participant), pptracker$Counterbalance[pptracker$participant %in% participant], 0), .after = sq_resp) %>% 
-      ungroup()
+      mutate(counterbalance = ifelse((participant %in% pptracker$participant), pptracker$counterbalance[pptracker$participant %in% participant], 0), .after = sq_resp) %>% 
+      ungroup() %>% 
     return(d_all)
 })
 
@@ -75,11 +75,9 @@ test <- x %>%
   select(-cue) %>% 
   select(participant, counterbalance) %>% 
   unique()
-
 ## any rows in test that don't match pptracker (excluded 73-78, 82)
 verify <- anti_join(pptracker, test, by = "participant", "counterbalance")
 
-# combine psychling data to x like it is done in 001 script combined_meta with left join
 
 # Save out metadata df
 saveRDS(x, paste0("data/TTA_metadata_",Sys.Date(),".rds"))
