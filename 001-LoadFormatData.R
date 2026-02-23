@@ -5,6 +5,8 @@ library(stringr)
 library(ggplot2)
 #Laptop
 datapath <- list.files(path = "C:/Users/westa/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
+#Home Desktop
+datapath <- list.files(path = "C:/Users/Stan/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
 #Work
 #datapath <- list.files(path = "C:/Users/Stan/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
 datapath <- datapath[-73]
