@@ -6,7 +6,7 @@ library(statmod)
 library(rstatix)
 
 ## Load data
-d <- readRDS("data/TTA_metadata.rds")
+d <- readRDS("data/TTA_metadata_2026-02-12.rds")
 
 ## Filter out non-responded trials
 responded_trials <- d %>%
