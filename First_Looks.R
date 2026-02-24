@@ -234,7 +234,7 @@ ez_long <- word_assoc_filt %>%
 ez_split <- split(ez_long,ez_long$measure)
 library(ez)
 
-map(ez_split, function(x){
+mods <- map(ez_split, function(x){
   m <- ezANOVA(dv = value,
           wid = cue,
           within = condition,
@@ -255,8 +255,8 @@ map(ez_split, function(x){
     xlab = "Condition",
     trace.label = "Context")
 
+ 
   return(list(m,contr_context, contr_condition,p))
   
 })
-
 
