@@ -5,22 +5,15 @@ library(stringr)
 library(readxl)
 library(ggplot2)
 
-## Home
-datapath <- list.files(path = "C:/Users/swest19/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT/", full.names = TRUE)
+## Work
+datapath <- "C:/Users/swest19/OneDrive - Louisiana State University/WordAssociationRTWM"
 
-
-# Set up datapath
-##Laptop
-datapath <- list.files(path = "C:/Users/westa/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
- 
-#Home Desktop
-datapath <- list.files(path = "C:/Users/Stan/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
 
 ##Work
 #datapath <- list.files(path = "C:/Users/Stan/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
 ##Meghan
 unzip("data_WMRT.zip")
-datapath <- list.files("data_WMRT", full.names = TRUE)
+datapath <- list.files("data_WMRT/", full.names = TRUE)
 
 datapath <- datapath[-73]
 
@@ -28,22 +21,27 @@ datapath <- datapath[-73]
 words_meta <- read.csv("data/stim_64_NNVB.csv")
 
 # Get participant counterbalances
-temp <- read_xlsx("TTAWM Counterbalance tracker.xlsx")[c(3,6)]
-pptracker <- temp %>% 
-  na.omit(temp) %>% 
+temp <- read_xlsx(paste0(datapath,"/TTAWM Counterbalance tracker.xlsx")) %>%
+  select(PPID, Date, Condition, Counterbalance)%>%
+  drop_na()
+
+pptracker <- temp %>%
   mutate(participant = str_remove(PPID, "TTA_"), .before = Counterbalance) %>% 
   mutate(participant = str_remove(participant, "^0+")) %>% 
-  rename(counterbalance = Counterbalance) %>% 
-  select(-PPID)
+  mutate(counterbalance = as.factor(Counterbalance)) %>% 
+  select(-PPID,-Counterbalance)
+
+
+files <- list.files(paste0(datapath,"/data_WMRT/"), full.names = T)[-73]
 
 # Make metadata df
-x <- map_dfr(datapath, function(x){
+x <- map_dfr(files, function(x){
     exp_load <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]trialstest.csv",full.names = TRUE))[1:32,] 
     exp_noload <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_NO_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]trialstest.csv",full.names = TRUE))[1:32,] 
     condition_df <- read.csv(list.files(x,pattern = "TTA_[0-9][0-9][0-9]_LOAD_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].csv",full.names = TRUE))[c(1,10),] %>%
       mutate(pp = as.character(pp))
     d_all <- rbind(exp_load,exp_noload) %>%
-      left_join(select(condition_df,pp,context = condition),by="pp") %>%
+      left_join(select(condition_df,pp,context = condition ),by="pp") %>%
       mutate(participant = as.factor(pp), .after = pp,
              context = as.factor(context),
              response = as.character(tolower(trimws(str_replace_all(input_textbox.text_raw,"'","")))),
@@ -72,20 +70,20 @@ x <- map_dfr(datapath, function(x){
              cue_rt_mili = cue_rt * 1000,
              type_dur_mili = type_dur * 1000) %>%
       left_join(select(words_meta,cue,strength_strat,type), by = "cue") %>% 
-      group_by(participant) %>% 
-      mutate(counterbalance = ifelse((participant %in% pptracker$participant), pptracker$counterbalance[pptracker$participant %in% participant], 0), .after = sq_resp) %>% 
+      group_by(participant) %>%
       ungroup() %>% 
     return(d_all)
 })
 
-# What I used to make sure the counterbalances all lined up
-test <- x %>% 
-  select(-cue) %>% 
-  select(participant, counterbalance) %>% 
-  unique()
-## any rows in test that don't match pptracker (excluded 73-78, 82)
-verify <- anti_join(pptracker, test, by = "participant", "counterbalance")
 
+x_count <- x %>%
+  left_join(select(pptracker,participant,counterbalance)) %>%
+  mutate(block = ifelse(counterbalance == 1 & condition == "load", 1,
+                    ifelse(counterbalance == 2 & condition == "no_load", 1,2)),
+         participant = as.factor(participant)) %>%
+  arrange(participant, block) %>%
+  group_by(participant) %>%
+  mutate(trialNum = seq.int(1,64,1))
 
 # Save out metadata df
-saveRDS(x, paste0("data/TTA_metadata_",Sys.Date(),".rds"))
+saveRDS(x_count, paste0("data/TTA_metadata_",Sys.Date(),".rds"))
