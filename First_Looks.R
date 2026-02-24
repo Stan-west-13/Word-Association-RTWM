@@ -8,7 +8,7 @@ library(rstatix)
 
 ## Load data
 
-d <- readRDS("data/TTA_metadata_2026-02-16.rds")
+d <- readRDS("data/TTA_metadata_2026-02-23.rds")
 rsp_map <- readRDS("data/response_map 2.rds")
 sub_map <- readRDS("data/subtlex 1.rds")
 aoa_map <- readRDS("data/kuperman 1.rds")
