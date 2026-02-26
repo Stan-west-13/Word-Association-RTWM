@@ -73,7 +73,7 @@ d_split <- map(lst_mods, function(x){
 mods <- map(d_split, function(y){
   map(y, function(x){
     ## random intercepts for participants and cue
-    m_lmer <- lmer(value ~ condition * context + (1|cue) + (1|participant), data = x ) 
+    m_lmer <- lmer(value ~ condition * context + (1|cue) + (condition|participant), data = x ) 
     print(paste("############## Model output for ", unique(x$measure),"########################"))
     print(summary(m_lmer))
     p <- interaction.plot(
