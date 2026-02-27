@@ -2,7 +2,8 @@ library(ggplot2)
 library(dplyr)
 library(readr)
 library(tidyr)
-
+library(lme4)
+library(rstatix)
 z <- function(x){
   return((x - mean(x,na.rm = T))/sd(x,na.rm = T))
 }
@@ -14,7 +15,7 @@ d <- read_rds("data/TTA2_meta_response_filtered-2026-02-26.rds")
 
 ############ Response time to Word Association ################################
 
-ggplot(d, aes(x = z_cue_rt,fill =context))+
+ggplot(d, aes(x = z_cue_rt_mili,fill =context))+
   geom_histogram(aes(alpha = 0.5))+
   facet_grid(condition~context)
 
@@ -32,7 +33,7 @@ pairs(em_condition)
 em_context <- emmeans(glmer_fit,~condition|context)
 pairs(em_context)
 
-glmer_plot_main <-  word_assoc_filt %>%
+glmer_plot_main <-  d %>%
   group_by(condition,context) %>%
   get_summary_stats(cue_rt_mili, type = c('mean_se'))
 
@@ -53,7 +54,7 @@ ggplot(glmer_plot_type, aes(x = type, y = mean, fill = strength_strat))+
   facet_grid(context~condition)
 
 
-ggplot(word_assoc_filt %>%
+ggplot(d %>%
          select(context,
                 condition,
                 aoa,
