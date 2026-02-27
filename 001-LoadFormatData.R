@@ -4,14 +4,12 @@ library(purrr)
 library(stringr)
 library(readxl)
 library(ggplot2)
+library(progressr)
 
-## Work
-datapath <- "C:/Users/swest19/OneDrive - Louisiana State University/WordAssociationRTWM"
+## Choose datapath
+datapath <- choose.dir()
 
 
-##Work
-#datapath <- list.files(path = "C:/Users/Stan/OneDrive - Louisiana State University/WordAssociationRTWM/data_WMRT", full.names = TRUE)
-##Meghan
 unzip("data_WMRT.zip")
 datapath <- list.files("data_WMRT/", full.names = TRUE)
 
