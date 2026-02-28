@@ -4,6 +4,8 @@ library(readr)
 library(tidyr)
 library(ez)
 library(lme4)
+library(lmerTest)
+source("R/Load_Helpers.R")
 
 z <- function(x){
   return((x - mean(x,na.rm = T))/sd(x,na.rm = T))
@@ -11,8 +13,7 @@ z <- function(x){
 
 
 ## Load data 
-d <- read_rds("data/TTA2_response_mapped_meta-2026-02-26.rds")
-
+d <- load_most_recent_by_mtime("data/","TTA2_response*")
 ## Remove un-responded trials and responses < 200 ms
 
 d_filt <- d %>%

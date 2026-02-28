@@ -6,9 +6,13 @@ library(lmerTest)
 library(statmod)
 library(tidyverse)
 library(rstatix)
+source("R/Load_Helpers.R")
+
+
+
 
 ## Load data
-d <- readRDS("data/TTA_metadata_2026-02-24.rds")
+d <- load_most_recent_by_mtime(directory = "data/", pattern = "TTA_metadata_*")
 
 ## Load psycholingistics
 rsp_map <- readRDS("data/response_map 2.rds")
