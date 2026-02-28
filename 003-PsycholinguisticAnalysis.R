@@ -71,11 +71,11 @@ d_split <- map(lst_mods, function(x){
 
 
 ## Run LMER, plot interaction plots and bar plots.
-mods <- map(d_split, function(y){
+mods <- imap(d_split, function(y,name){
   map(y, function(x){
     ## random intercepts for participants and cue
     m_lmer <- lmer(value ~ condition * context + (1|cue) + (condition|participant), data = x ) 
-    print(paste("############## Model output for ", unique(x$measure),"########################"))
+    print(paste("############## Model output for ", unique(x$measure),name,"########################"))
     print(summary(m_lmer))
     p <- interaction.plot(
       x.factor = x$condition,
