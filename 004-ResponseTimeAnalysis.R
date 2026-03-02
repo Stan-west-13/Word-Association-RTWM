@@ -30,7 +30,8 @@ ggplot(d, aes(x = condition, y = cue_rt_mili))+
 
 ## Looking at counterbalances: looks like people are faster in block 2 
 ## regardless of condition - maybe practice effects/wanting to be done. 
-ggplot(d, aes(x = context, y = cue_rt_mili, fill = counterbalance))+
+ggplot(d %>%
+         filter(cue_rt_mili <= 5000), aes(x = context, y = cue_rt_mili, fill = counterbalance))+
   stat_summary(fun = "mean", geom = "col", position = "dodge")+
   facet_grid(block~condition, labeller = "label_both") +
   geom_text(stat = "summary",fun = "mean",vjust = 12, aes(label = round(after_stat(y),2)),
@@ -73,7 +74,8 @@ ggplot(d %>% filter(block == 1), aes(x = context, y = cue_rt_mili, fill = condit
 
 glmer_fit <- glmer(
   cue_rt_mili ~ context * condition + (1 | cue) + (1 | participant),
-  data = d %>% filter(block == 1),
+  data = d %>%
+    filter(cue_rt_mili <= 5000),
   family = inverse.gaussian("identity")
 )
 
@@ -88,10 +90,11 @@ em_context <- emmeans(glmer_fit,~condition|context)
 pairs(em_context)
 
 glmer_plot_main <-  d %>%
+  filter(cue_rt_mili <= 5000) %>%
   group_by(condition,context) %>%
   get_summary_stats(cue_rt_mili, type = c('mean_se'))
 
-ggplot(glmer_plot_main, aes(x = condition, y = mean, fill = context))+
+ggplot(glmer_plot_main, aes(x = context, y = mean, fill = condition))+
   geom_col(position = "dodge")+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
                 position = position_dodge(0.9),
@@ -99,7 +102,7 @@ ggplot(glmer_plot_main, aes(x = condition, y = mean, fill = context))+
   geom_text(stat = "identity", aes(label = after_stat(y)), vjust = 45,
             position = position_dodge(0.9))
 
-glmer_plot_type <- word_assoc_filt %>%
+glmer_plot_type <- d %>%
   group_by(condition,type,strength_strat,context) %>%
   get_summary_stats(cue_rt_mili, type = c('mean_se'))
 
