@@ -5,6 +5,7 @@ library(tidyr)
 library(ez)
 library(lme4)
 library(lmerTest)
+library(codingMatrices)
 source("R/Load_Helpers.R")
 
 z <- function(x){
@@ -28,7 +29,8 @@ d_filt <- d %>%
   mutate(wf_z = z(Lg10WF),
          aoa_z = z(aoa),
          wl_z = z(nchar),
-         cd_z = z(Lg10CD))
+         cd_z = z(Lg10CD)) %>%
+  mutate(context = factor(context, levels = c("peer","child","short","creative")))
 write_rds(d_filt, file = paste0("data/TTA2_meta_response_filtered-",Sys.Date(),".rds"))
 write.csv(d_filt, "data/Julia_df_meta.csv")
 
@@ -81,6 +83,12 @@ mods <- imap(d_split, function(y,name){
     m_lmer <- lmer(value ~ condition * context + (1|cue) + (1|participant), data = x ) 
     print(paste("############## Model output for ", unique(x$measure),name,"########################"))
     print(summary(m_lmer))
+    
+    contrasts(x$context) <- code_diff(4)
+    m_lmer_diff <- lmer(value ~ condition * context + (1|cue) + (1|participant), data = x ) 
+    print(paste("############## Model output for ", unique(x$measure),name," DIFF ","########################"))
+    print(summary(m_lmer_diff))
+    
     p <- interaction.plot(
       x.factor = x$condition,
       trace.factor = x$context,
@@ -98,9 +106,8 @@ mods <- imap(d_split, function(y,name){
       ggtitle(paste0("Barplot by Context ",unique(x$measure)))+
       theme_classic()
     
-    return(list(model = m_lmer, p,plot(g)))
+    return(list(model = m_lmer,model_helm = m_lmer_diff, p,plot(g)))
   })
 })
-pairs(emmeans(mods$nonnormal$nchar$model,~condition+context), by="condition")
 
 
