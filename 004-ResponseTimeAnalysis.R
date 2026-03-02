@@ -19,12 +19,14 @@ d <- load_most_recent_by_mtime("data/", pattern = "TTA2_meta_response_filtered-"
 
 ############ Response time to Word Association ################################
 
+## Histograms
 ggplot(d, aes(x = z_cue_rt_mili,fill =context))+
   geom_histogram()+
   facet_grid(condition~context)
-
+## Barplot of Means
 ggplot(d, aes(x = condition, y = cue_rt_mili))+
   stat_summary(fun = "mean", geom="col")
+
 
 ## Looking at counterbalances: looks like people are faster in block 2 
 ## regardless of condition - maybe practice effects/wanting to be done. 
@@ -46,14 +48,14 @@ d_diff <- d %>%
   mutate(diff_block = m[block == 2] - m[block == 1]) %>%
   ungroup()
 
+## Difference between Conditions
 ggplot(d_diff, aes(x = context, y = diff_cond, fill = block))+
   stat_summary(fun = "identity", geom = "col",position = "dodge")+
   theme_bw()+
   annotate("text",label = "FASTER IN LOAD",x=2.25,y = 125,size = 8)+
   annotate("text",label = "FASTER IN NO LOAD",x=2.25,y = -125,size = 8)
-
-
-
+## Difference between Blocks. Participants are faster in block 2 across the 
+## board.
 ggplot(d_diff, aes(x = context, y = diff_block, fill = condition))+
   stat_summary(fun = "identity", geom = "col",position = "dodge")+
   theme_bw()+
@@ -62,7 +64,7 @@ ggplot(d_diff, aes(x = context, y = diff_block, fill = condition))+
 
 
 ## Just looking at block 1
-ggplot(d %>% filter(block == 2), aes(x = context, y = cue_rt_mili, fill = condition))+
+ggplot(d %>% filter(block == 1), aes(x = context, y = cue_rt_mili, fill = condition))+
   stat_summary(fun = "mean", geom = "col", position = "dodge")+
   geom_text(stat = "summary",fun = "mean",vjust = 12, aes(label = round(after_stat(y),2)),
             position = position_dodge(0.9))+
@@ -70,10 +72,13 @@ ggplot(d %>% filter(block == 2), aes(x = context, y = cue_rt_mili, fill = condit
 
 
 glmer_fit <- glmer(
-  cue_rt_mili ~ context * condition   + (1 | cue) + (1 | participant),
-  data = d,
+  cue_rt_mili ~ context * condition + (1 | cue) + (1 | participant),
+  data = d %>% filter(block == 1),
   family = inverse.gaussian("identity")
 )
+
+summary(lmer(log10(cue_rt_mili)~context * condition + (context*condition | cue) + (condition | participant),
+     data = d))
 
 summary(glmer_fit)
 
@@ -102,30 +107,11 @@ ggplot(glmer_plot_type, aes(x = type, y = mean, fill = strength_strat))+
   geom_col(position = "dodge")+
   facet_grid(context~condition)
 
-
 ggplot(d %>%
-         select(context,
-                condition,
-                aoa,
-                Lg10WF,
-                Lg10CD,
-                nchar) %>%
-         pivot_longer(cols = c("aoa",starts_with("Lg"),"nchar"),
-                      names_to = "measure",
-                      values_to = "value"), aes(x = context, y = value))+
-  stat_summary(fun = "mean",geom = "bar")+
-  facet_grid(measure~condition, scales= "free_y")
+         group_by(participant,context,condition) %>%
+         mutate(avg_rt = mean(cue_rt_mili),
+                avg_acc = mean(accuracy)), aes(x = avg_rt, y = avg_acc, color = context))+
+  geom_point()+
+  geom_smooth(method = "loess")+
+  facet_grid(~condition, scales = "free")
 
-ez_long <- word_assoc_filt %>%
-  select(participant,
-         cue,
-         context,
-         condition,
-         aoa,
-         Lg10WF,
-         Lg10CD,
-         nchar) %>%
-  pivot_longer(cols = c("aoa",starts_with("Lg"),"nchar"),
-               names_to = "measure",
-               values_to = "value") %>%
-  drop_na()
