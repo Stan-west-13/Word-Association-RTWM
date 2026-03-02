@@ -19,3 +19,9 @@ load_most_recent_by_mtime <- function(directory, pattern = NULL, read_fun = read
   # Load the file using the provided read function
   return(read_fun(most_recent_file, ...))
 }
+
+
+choose_directory <- function(){
+  require(rstudioapi)
+  return(rstudioapi::selectDirectory())
+}
