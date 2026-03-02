@@ -5,22 +5,16 @@ library(stringr)
 library(readxl)
 library(ggplot2)
 library(progressr)
-
-choose_directory <- function(){
-  if (interactive() && .Platform$OS.type == "windows")
-    rstudioapi::showDialog("Select Your Folder", "GUI Initailzed")
-    choose.dir(getwd(), "Choose a suitable folder")
-}
-
+source("R/Load_Helpers.R")
 
 ## Choose datapath
 datapath <- choose_directory()
 
 
-unzip("data_WMRT.zip")
-datapath <- list.files("data_WMRT/", full.names = TRUE)
-
-datapath <- datapath[-73]
+# unzip("data_WMRT.zip")
+# datapath <- list.files("data_WMRT/", full.names = TRUE)
+# 
+# datapath <- datapath[-73]
 
 # Read in cue
 words_meta <- read.csv("data/stim_64_NNVB.csv")
