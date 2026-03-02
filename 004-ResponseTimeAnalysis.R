@@ -4,20 +4,69 @@ library(readr)
 library(tidyr)
 library(lme4)
 library(rstatix)
+library(lmerTest)
+library(emmeans)
+source("R/Load_Helpers.R")
+
 z <- function(x){
   return((x - mean(x,na.rm = T))/sd(x,na.rm = T))
 }
 
 
 ## Load data 
-d <- read_rds("data/TTA2_meta_response_filtered-2026-02-26.rds")
+d <- load_most_recent_by_mtime("data/", pattern = "TTA2_meta_response_filtered-")
 
 
 ############ Response time to Word Association ################################
 
 ggplot(d, aes(x = z_cue_rt_mili,fill =context))+
-  geom_histogram(aes(alpha = 0.5))+
+  geom_histogram()+
   facet_grid(condition~context)
+
+ggplot(d, aes(x = condition, y = cue_rt_mili))+
+  stat_summary(fun = "mean", geom="col")
+
+## Looking at counterbalances: looks like people are faster in block 2 
+## regardless of condition - maybe practice effects/wanting to be done. 
+ggplot(d, aes(x = context, y = cue_rt_mili, fill = counterbalance))+
+  stat_summary(fun = "mean", geom = "col", position = "dodge")+
+  facet_grid(block~condition, labeller = "label_both") +
+  geom_text(stat = "summary",fun = "mean",vjust = 12, aes(label = round(after_stat(y),2)),
+            position = position_dodge(0.9))+
+  theme_bw()
+
+
+## Difference plots
+d_diff <- d %>%
+  group_by(context,condition,block,counterbalance) %>%
+  summarize(m = mean(cue_rt_mili)) %>%
+  group_by(context,block) %>%
+  mutate(diff_cond = m[condition == "load"] - m[condition == "no_load"]) %>%
+  group_by(context,condition) %>%
+  mutate(diff_block = m[block == 2] - m[block == 1]) %>%
+  ungroup()
+
+ggplot(d_diff, aes(x = context, y = diff_cond, fill = block))+
+  stat_summary(fun = "identity", geom = "col",position = "dodge")+
+  theme_bw()+
+  annotate("text",label = "FASTER IN LOAD",x=2.25,y = 125,size = 8)+
+  annotate("text",label = "FASTER IN NO LOAD",x=2.25,y = -125,size = 8)
+
+
+
+ggplot(d_diff, aes(x = context, y = diff_block, fill = condition))+
+  stat_summary(fun = "identity", geom = "col",position = "dodge")+
+  theme_bw()+
+  annotate("text",label = "FASTER IN BLOCK 1",x=2.25,y = 125,size = 8)+
+  annotate("text",label = "FASTER IN BLOCK 2",x=1.75,y = -300,size = 8)
+
+
+## Just looking at block 1
+ggplot(d %>% filter(block == 2), aes(x = context, y = cue_rt_mili, fill = condition))+
+  stat_summary(fun = "mean", geom = "col", position = "dodge")+
+  geom_text(stat = "summary",fun = "mean",vjust = 12, aes(label = round(after_stat(y),2)),
+            position = position_dodge(0.9))+
+  theme_bw()
 
 
 glmer_fit <- glmer(

@@ -78,7 +78,8 @@ x_count <- x %>%
   left_join(select(pptracker,participant,counterbalance)) %>%
   mutate(block = ifelse(counterbalance == 1 & condition == "load", 1,
                     ifelse(counterbalance == 2 & condition == "no_load", 1,2)),
-         participant = as.factor(participant)) %>%
+         participant = as.factor(participant),
+         block = as.factor(block)) %>%
   arrange(participant, block) %>%
   group_by(participant) %>%
   mutate(trialNum = seq.int(1,64,1))

@@ -23,7 +23,7 @@ d_filt <- d %>%
   mutate(z_cue_rt_mili = (cue_rt_mili - mean(cue_rt_mili))/sd(cue_rt_mili), ## participant-wise rt z-scores
          z_type_dur_mili = (type_dur_mili - mean(type_dur_mili))/sd(type_dur_mili)) %>% ## participant-wise typing z-scores
   filter(abs(z_cue_rt_mili) <= 2 & abs(z_type_dur_mili) <= 2) %>% ## removing response times > 2 z-scores from mean
-  mutate(context = relevel(context,ref = "child")) %>% ## set "child" as the reference
+  mutate(context = relevel(context,ref = "peer")) %>% ## set "child" as the reference
   ungroup() %>%
   mutate(wf_z = z(Lg10WF),
          aoa_z = z(aoa),
@@ -39,6 +39,8 @@ d_long_filt_normalized <- d_filt %>%
          cue,
          context,
          condition,
+         counterbalance,
+         block,
          aoa_z,
          wf_z,
          cd_z,
@@ -53,6 +55,8 @@ d_long_filt_nonnormalized <- d_filt %>%
          cue,
          context,
          condition,
+         counterbalance,
+         block,
          aoa,
          Lg10WF,
          Lg10CD,
@@ -74,7 +78,7 @@ d_split <- map(lst_mods, function(x){
 mods <- imap(d_split, function(y,name){
   map(y, function(x){
     ## random intercepts for participants and cue
-    m_lmer <- lmer(value ~ condition * context + (1|cue) + (condition|participant), data = x ) 
+    m_lmer <- lmer(value ~ condition * context + (1|cue) + (1|participant), data = x ) 
     print(paste("############## Model output for ", unique(x$measure),name,"########################"))
     print(summary(m_lmer))
     p <- interaction.plot(
@@ -94,9 +98,9 @@ mods <- imap(d_split, function(y,name){
       ggtitle(paste0("Barplot by Context ",unique(x$measure)))+
       theme_classic()
     
-    return(list(summary(m_lmer), p,plot(g)))
+    return(list(model = m_lmer, p,plot(g)))
   })
 })
-
+pairs(emmeans(mods$nonnormal$nchar$model,~condition+context), by="condition")
 
 
