@@ -23,7 +23,7 @@ d_filt <- d %>%
   mutate(z_cue_rt_mili = (cue_rt_mili - mean(cue_rt_mili))/sd(cue_rt_mili), ## participant-wise rt z-scores
          z_type_dur_mili = (type_dur_mili - mean(type_dur_mili))/sd(type_dur_mili)) %>% ## participant-wise typing z-scores
   filter(abs(z_cue_rt_mili) <= 2 & abs(z_type_dur_mili) <= 2) %>% ## removing response times > 2 z-scores from mean
-  mutate(context = relevel(context,ref = "peer")) %>% ## set "child" as the reference
+  mutate(context = relevel(context,ref = "child")) %>% ## set "child" as the reference
   ungroup() %>%
   mutate(wf_z = z(Lg10WF),
          aoa_z = z(aoa),
@@ -101,6 +101,6 @@ mods <- imap(d_split, function(y,name){
     return(list(model = m_lmer, p,plot(g)))
   })
 })
-pairs(emmeans(mods$nonnormal$nchar$model,~condition+context), by="condition")
+
 
 
