@@ -6,8 +6,15 @@ library(readxl)
 library(ggplot2)
 library(progressr)
 
+choose_directory <- function(){
+  if (interactive() && .Platform$OS.type == "windows")
+    rstudioapi::showDialog("Select Your Folder", "GUI Initailzed")
+    choose.dir(getwd(), "Choose a suitable folder")
+}
+
+
 ## Choose datapath
-datapath <- choose.dir()
+datapath <- choose_directory()
 
 
 unzip("data_WMRT.zip")
