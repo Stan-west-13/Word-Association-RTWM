@@ -34,8 +34,8 @@ all_psychling <- full_join(sub,aoa) %>%
   rowwise() %>%
   mutate(sum_na = sum(is.na(c_across(c(Lg10WF,Lg10CD,aoa))))) %>%
   group_by(response) %>%
-  slice_min(sum_na, n = 1) ## keep the mapping with least amount of missing values
-
+  slice_min(sum_na, n = 1) %>% ## keep the mapping with least amount of missing values
+  filter(!(response == "idk"))
 ## Join psycholing to responses and add nchar
 response_psychling <- d %>%
   left_join(all_psychling) %>%
