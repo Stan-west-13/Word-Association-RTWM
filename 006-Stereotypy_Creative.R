@@ -19,7 +19,6 @@ d <- load_most_recent_by_mtime("data/", pattern = "TTA2_meta_response_filtered-"
 
 ## Stereotypy & Creative scores by context
 d_sc <- d %>%
-  filter(!cue == response) %>%
   group_by(context,cue) %>%
   count(response, sort = TRUE,name = "resp_count") %>%
   left_join(d, by = c("response","cue","context")) %>%
