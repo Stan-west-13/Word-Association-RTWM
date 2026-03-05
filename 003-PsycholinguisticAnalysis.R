@@ -111,3 +111,12 @@ mods <- imap(d_split, function(y,name){
 })
 
 
+## All_metrics plot
+d_plot <- d_filt %>%
+  select(condition,context, condition, ends_with("z")) %>%
+  pivot_longer(cols = ends_with("z"),
+               names_to = "measure",
+               values_to = "value")
+ggplot(d_plot, aes(x = context, y = value, fill = condition))+
+  stat_summary(geom = "col", fun = "mean", position = "dodge")+
+  facet_wrap(~measure)
