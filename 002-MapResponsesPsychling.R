@@ -35,11 +35,12 @@ all_psychling <- full_join(sub,aoa) %>%
   mutate(sum_na = sum(is.na(c_across(c(Lg10WF,Lg10CD,aoa))))) %>%
   group_by(response) %>%
   slice_min(sum_na, n = 1) %>% ## keep the mapping with least amount of missing values
-  filter(!(response == "idk"),
-         ! response == cue)
+  filter(!(response == "idk"))
 ## Join psycholing to responses and add nchar
 response_psychling <- d %>%
   left_join(all_psychling) %>%
-  mutate(nchar = nchar(response))
+  mutate(nchar = nchar(response)) %>% 
+  group_by(cue) %>%
+  filter(!response == cue)
 saveRDS(response_psychling,file = paste0("data/TTA2_response_mapped_meta-",Sys.Date(),".rds"))
 
