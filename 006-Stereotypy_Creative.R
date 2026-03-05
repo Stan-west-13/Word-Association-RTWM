@@ -6,6 +6,7 @@ library(lme4)
 library(rstatix)
 library(lmerTest)
 library(emmeans)
+library(ggsignif)
 source("R/Load_Helpers.R")
 
 z <- function(x){
@@ -31,9 +32,35 @@ d_sc <- d %>%
 
 
 ggplot(d_sc, aes(x = context, y = sum_stereo, fill = condition))+
-  stat_summary(fun = "mean", geom = "col", position = "dodge") +
+  stat_summary(fun = "mean", 
+               geom = "col", 
+               position = "dodge") +
+  stat_summary(fun.data = mean_se, 
+               geom = "errorbar", 
+               position = position_dodge(width = 0.90))+
+  geom_signif(
+                 comparisons = list(c("peer", "child"), c("child", "short"), c("short","creative"),c("peer","short")),
+                 map_signif_level = TRUE,  # Converts p-values to stars
+                 test = "t.test",y_position = 23           # Statistical test to run
+               )+
   labs(y = "avg_stereptypy")
 
 ggplot(d_sc, aes(x = context, y = sum_creative, fill = condition))+
   stat_summary(fun = "mean", geom = "col", position = "dodge")+
+  stat_summary(fun.data = mean_se, 
+               geom = "errorbar", 
+               position = position_dodge(width = 0.90))+
+  geom_signif(
+    comparisons = list(c("peer", "child"), c("child", "short"), c("short","creative"),c("peer","short")),
+    map_signif_level = TRUE,  # Converts p-values to stars
+    test = "t.test",y_position = 23           # Statistical test to run
+  )+
   labs(y = "avg_creativity")
+
+
+m_stereo <- lmer(sum_stereo ~ context*condition + (1|cue) , data = d_sc)
+summary(m_stereo)
+
+
+m_creative <- lmer(sum_creative ~ context*condition + (1|cue) , data = d_sc)
+summary(m_creative)
