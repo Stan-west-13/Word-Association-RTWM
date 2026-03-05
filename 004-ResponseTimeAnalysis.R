@@ -16,7 +16,6 @@ z <- function(x){
 ## Load data 
 d <- load_most_recent_by_mtime("data/", pattern = "TTA2_meta_response_filtered-")
 
-
 ############ Response time to Word Association ################################
 
 ## Histograms
@@ -61,11 +60,11 @@ ggplot(d_diff, aes(x = context, y = diff_block, fill = condition))+
   stat_summary(fun = "identity", geom = "col",position = "dodge")+
   theme_bw()+
   annotate("text",label = "FASTER IN BLOCK 1",x=2.25,y = 125,size = 8)+
-  annotate("text",label = "FASTER IN BLOCK 2",x=1.75,y = -300,size = 8)
+  annotate("text",label = "FASTER IN BLOCK 2",x=2.25,y = -300,size = 8)
 
 
 ## Just looking at block 1
-ggplot(d %>% filter(block == 1), aes(x = context, y = cue_rt_mili, fill = condition))+
+ggplot(d , aes(x = context, y = cue_rt_mili, fill = condition))+
   stat_summary(fun = "mean", geom = "col", position = "dodge")+
   geom_text(stat = "summary",fun = "mean",vjust = 12, aes(label = round(after_stat(y),2)),
             position = position_dodge(0.9))+
