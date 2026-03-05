@@ -90,7 +90,7 @@ em_context <- emmeans(glmer_fit,~condition|context)
 pairs(em_context)
 
 glmer_plot_main <-  d %>%
-  filter(cue_rt_mili <= 5000) %>%
+  filter(cue_rt_mili <= 5000, block == 1) %>%
   group_by(condition,context) %>%
   get_summary_stats(cue_rt_mili, type = c('mean_se'))
 
