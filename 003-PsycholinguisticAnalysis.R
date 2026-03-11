@@ -112,11 +112,21 @@ mods <- imap(d_split, function(y,name){
 
 
 ## All_metrics plot
-d_plot <- d_filt %>%
-  select(condition,context, condition, ends_with("z")) %>%
-  pivot_longer(cols = ends_with("z"),
-               names_to = "measure",
-               values_to = "value")
-ggplot(d_plot, aes(x = context, y = value, fill = condition))+
-  stat_summary(geom = "col", fun = "mean", position = "dodge")+
-  facet_wrap(~measure)
+
+model <- lm(value ~ context *measure, data = d_plot %>% filter(!context == "creative"))
+
+# Estimated marginal means and contrasts
+em <- emmeans(model, ~ context | measure)
+contr <- contrast(em, method = "pairwise")
+
+# Convert to data frame for plotting
+df <- as.data.frame(contr)
+
+ggplot(df, aes(x = contrast, y = estimate, ymin = estimate - SE, ymax = estimate + SE)) +
+  geom_pointrange() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(y = "Difference of Means", title = "Pairwise Contrasts by Measure")+
+  facet_grid(~measure)+
+  theme_bw()+ 
+  theme(axis.text.x = element_text(angle = 45,vjust = 0.5))
+
