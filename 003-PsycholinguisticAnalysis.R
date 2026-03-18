@@ -3,6 +3,7 @@ library(dplyr)
 library(readr)
 library(tidyr)
 library(ez)
+library(purrr)
 library(lme4)
 library(lmerTest)
 library(codingMatrices)
@@ -111,6 +112,13 @@ mods <- imap(d_split, function(y,name){
 })
 
 
+d_plot <- d_filt %>%
+  select(condition,context, c(aoa,nchar,Lg10CD,Lg10WF)) %>%
+  pivot_longer(cols = c(aoa,nchar,Lg10CD,Lg10WF),
+               names_to = "measure",
+               values_to = "value") %>%
+  ungroup()
+
 ## All_metrics plot
 
 model <- lm(value ~ context *measure, data = d_plot %>% filter(!context == "creative"))
@@ -127,6 +135,86 @@ ggplot(df, aes(x = contrast, y = estimate, ymin = estimate - SE, ymax = estimate
   geom_hline(yintercept = 0, linetype = "dashed") +
   labs(y = "Difference of Means", title = "Pairwise Contrasts by Measure")+
   facet_grid(~measure)+
-  theme_bw()+ 
+  theme_bw(base_size = 24)+ 
   theme(axis.text.x = element_text(angle = 45,vjust = 0.5))
+
+
+
+### Plot with correct SE
+
+
+cis <- map_dfr(split(d_plot,d_plot$measure), ~{
+  rtrn <- .x %>%
+    group_by(context,condition) %>%
+    summarize(means = mean(value, na.rm = TRUE),
+              SE = sd(value, na.rm = TRUE) / sqrt(n()),.groups = "keep") %>%
+    ungroup() %>%
+    mutate(`child - peer_diff_load` = means[context == "child" & condition == "load"] - means[context == "peer" & condition == "load"],
+           `short - peer_diff_load` = means[context == "short" & condition == "load"] - means[context == "peer" & condition == "load"],
+           `child - short_diff_load` = means[context == "child" & condition == "load"] - means[context == "short" & condition == "load"],
+           `child - peer_CIU_load` = `child - peer_diff_load` + 1.96*SE,
+           `short - peer_CIU_load` = `short - peer_diff_load`+ 1.96*SE,
+           `child - short_CIU_load` = `child - short_diff_load`+ 1.96*SE,
+           `child - peer_CIL_load` = `child - peer_diff_load` - 1.96*SE,
+           `short - peer_CIL_load` = `short - peer_diff_load`- 1.96*SE,
+           `child - short_CIL_load` = `child - short_diff_load`- 1.96*SE,
+           `child - peer_diff_noload` = means[context == "child"& condition == "no_load"] - means[context == "peer"& condition == "no_load"],
+           `short - peer_diff_noload` = means[context == "short"& condition == "no_load"] - means[context == "peer"& condition == "no_load"],
+           `child - short_diff_noload` = means[context == "child"& condition == "no_load"] - means[context == "short"& condition == "no_load"],
+           `child - peer_CIU_noload` = `child - peer_diff_noload` + 1.96*SE,
+           `short - peer_CIU_noload` = `short - peer_diff_noload`+ 1.96*SE,
+           `child - short_CIU_noload` = `child - short_diff_noload`+ 1.96*SE,
+           `child - peer_CIL_noload` = `child - peer_diff_noload` - 1.96*SE,
+           `short - peer_CIL_noload` = `short - peer_diff_noload`- 1.96*SE,
+           `child - short_CIL_noload` = `child - short_diff_noload`- 1.96*SE,) %>%
+    mutate(measure = unique(.x$measure))
+  return(rtrn)
+}) %>%
+  select(-condition) %>%
+  pivot_longer(cols = contains("-"),
+               names_to = c("contrast","value","Condition"),
+               values_to = c("x"),
+               names_sep = "_") %>%
+  pivot_wider(names_from = "value",
+              values_from = "x") %>%
+  mutate(contrast = factor(contrast, levels = c("child - peer", "short - peer", "child - short")),
+         measure = factor(measure, levels = c("aoa", "nchar", "Lg10CD", "Lg10WF")))
+
+ggplot(aes(x = contrast, y = diff, color = Condition), data = cis) +
+  stat_summary(geom = "point", fun = "mean",size = 2)+
+  geom_errorbar(aes(ymin = CIL, ymax = CIU,width = 0)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  facet_wrap(~measure,
+             nrow = 2,
+             ncol = 2, 
+             labeller = as_labeller(c("aoa" = "Age of Acquisition",
+                                      "nchar" = "Word Length",
+                                      "Lg10CD" = "Contextual Diversity",
+                                      "Lg10WF" = "Frequency")))+
+  scale_color_discrete(labels = c("Load", "No Load"))+
+  theme_bw()+
+  labs( x = "Contrast")
+
+
+
+
+
+
+
+
+cis <- map_dfr(split(d_plot,d_plot$measure)[1], ~{
+  rtrn <- .x %>%
+    group_by(context,condition) %>%
+    summarize(means = mean(value, na.rm = TRUE),
+              SE = sd(value, na.rm = TRUE) / sqrt(n()),.groups = "keep") %>%
+    group_by(context,condition) %>%
+#  mutate(`child - peer_diff_load` = means[context == "child" & condition == "load"] - means[context == "peer" & condition == "load"],)
+  return(rtrn)
+})
+
+
+
+
+
+
 
