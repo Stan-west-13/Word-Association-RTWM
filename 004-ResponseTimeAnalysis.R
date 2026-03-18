@@ -67,9 +67,11 @@ ggplot(d_diff, aes(x = context, y = diff_block, fill = condition))+
 ggplot(d , aes(x = context, y = cue_rt_mili, fill = condition))+
   stat_summary(fun = "mean", geom = "col", position = "dodge")+
   geom_text(stat = "summary",fun = "mean",vjust = 12, aes(label = round(after_stat(y),2)),
-            position = position_dodge(0.9))+
-  theme_bw()
-
+            position = position_dodge(0.9),size = 8)+
+  theme_bw(base_size = 24)+
+  scale_fill_discrete(labels = c("Load", "No Load"))+
+  labs(y = "response time (ms)")
+ggsave("Figures/response_time_plot.png")
 
 glmer_fit <- glmer(
   cue_rt_mili ~ context * condition + (1 | cue) + (1 | participant),
