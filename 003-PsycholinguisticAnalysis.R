@@ -181,8 +181,8 @@ cis <- map_dfr(split(d_plot,d_plot$measure), ~{
          measure = factor(measure, levels = c("aoa", "nchar", "Lg10CD", "Lg10WF")))
 
 ggplot(aes(x = contrast, y = diff, color = Condition), data = cis) +
-  stat_summary(geom = "point", fun = "mean",size = 2)+
-  geom_errorbar(aes(ymin = CIL, ymax = CIU,width = 0)) +
+  stat_summary(geom = "point", fun = "mean",size = 4)+
+  geom_errorbar(aes(ymin = CIL, ymax = CIU,width = 0),size = 2) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   facet_wrap(~measure,
              nrow = 2,
@@ -192,25 +192,10 @@ ggplot(aes(x = contrast, y = diff, color = Condition), data = cis) +
                                       "Lg10CD" = "Contextual Diversity",
                                       "Lg10WF" = "Frequency")))+
   scale_color_discrete(labels = c("Load", "No Load"))+
-  theme_bw()+
+  theme_bw(base_size = 18)+
   labs( x = "Contrast")
+ggsave("Figures/psychlong_contrasts.png", width = 12, height = 6)
 
-
-
-
-
-
-
-
-cis <- map_dfr(split(d_plot,d_plot$measure)[1], ~{
-  rtrn <- .x %>%
-    group_by(context,condition) %>%
-    summarize(means = mean(value, na.rm = TRUE),
-              SE = sd(value, na.rm = TRUE) / sqrt(n()),.groups = "keep") %>%
-    group_by(context,condition) %>%
-#  mutate(`child - peer_diff_load` = means[context == "child" & condition == "load"] - means[context == "peer" & condition == "load"],)
-  return(rtrn)
-})
 
 
 

@@ -74,12 +74,11 @@ ggplot(d , aes(x = context, y = cue_rt_mili, fill = condition))+
 glmer_fit <- glmer(
   cue_rt_mili ~ context * condition + (1 | cue) + (1 | participant),
   data = d %>%
-    filter(cue_rt_mili <= 5000),
+    filter(cue_rt_mili <= 5000) %>%
+    mutate(context = relevel(context,ref="child")),
   family = inverse.gaussian("identity")
 )
 
-summary(lmer(log10(cue_rt_mili)~context * condition + (context*condition | cue) + (condition | participant),
-     data = d))
 
 summary(glmer_fit)
 
