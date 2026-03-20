@@ -5,6 +5,7 @@ library(tidyr)
 library(ez)
 library(purrr)
 library(lme4)
+library(rstatix)
 library(lmerTest)
 library(codingMatrices)
 source("R/Load_Helpers.R")
@@ -68,6 +69,12 @@ d_long_filt_nonnormalized <- d_filt %>%
                names_to = "measure",
                values_to = "value") %>%
   drop_na()
+
+d_long_filt_nonnormalized %>% 
+  group_by(context, measure) %>% 
+  get_summary_stats(value, type = "common")
+
+
 
 lst_mods <- list(normalized = d_long_filt_normalized, nonnormal = d_long_filt_nonnormalized)
 
