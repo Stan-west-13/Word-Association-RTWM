@@ -193,7 +193,8 @@ ggplot(aes(x = contrast, y = diff, color = Condition), data = cis) +
                                       "Lg10WF" = "Frequency")))+
   scale_color_discrete(labels = c("Load", "No Load"))+
   theme_bw(base_size = 18)+
-  labs( x = "Contrast")
+  labs( x = "Contrast",
+        y = "raw mean difference")
 ggsave("Figures/psychlong_contrasts.png", width = 12, height = 6)
 
 
