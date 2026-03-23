@@ -78,6 +78,15 @@ ggplot(pp_prop, aes(x = na_proportion)) +
   geom_histogram(bins = 100)
 
 # Flag participants responding with the cue 50% of the time
+cue_match_resp <- d %>% 
+  filter(!(cue %in% lowest_resp)) %>% # removes lowest 5 cues from proportions
+  mutate(cue_resp_match = ifelse((response == cue & (!is.na(response))), 1, 0)) %>% 
+  group_by(participant) %>% 
+  mutate(cue_match_count = sum(as.integer(cue_resp_match))) %>% 
+  mutate(cue_match_prop = cue_match_count/59) %>%  # proportion of cue-response matches out of 59 cues (64 minus 5 lowest responses)
+  select(participant, cue_match_prop) %>% 
+  distinct() %>% 
+  arrange(desc(cue_match_prop))
 
-
-
+ggplot(cue_match_resp, aes(x = cue_match_prop)) +
+  geom_histogram(bins = 50)
