@@ -5,10 +5,11 @@
 # Packages
 library(tidyverse)
 library(ggplot2)
+library(readr)
 source("R/Load_Helpers.R")
 
-d <- readRDS("data/TTA2_metadata_2026-03-22.rds") # doesn't work 
-d2 <- d <- load_most_recent_by_mtime("data/", pattern = "TTA2_meta_response_filtered-")
+d <- load_most_recent_by_mtime("data", pattern = "TTA_metadata_")
+d2 <- load_most_recent_by_mtime("data/", pattern = "TTA2_meta_response_filtered-")
 
 ####################
 # Cue descriptives
@@ -18,7 +19,7 @@ d2 <- d <- load_most_recent_by_mtime("data/", pattern = "TTA2_meta_response_filt
 
 cue_count <- d %>% 
   filter(cue_rt_mili > 200) %>% ## no cue response times quicker than 200 ms
-  group_by(participant) %>% 
+  group_by(participant) %>%
   mutate(z_cue_rt_mili = (cue_rt_mili - mean(cue_rt_mili))/sd(cue_rt_mili), ## participant-wise rt z-scores
          z_type_dur_mili = (type_dur_mili - mean(type_dur_mili))/sd(type_dur_mili)) %>% ## participant-wise typing z-scores
   filter(abs(z_cue_rt_mili) <= 2 & abs(z_type_dur_mili) <= 2) %>% ## removing response times > 2 z-scores from mean
@@ -59,10 +60,6 @@ lowest_resp <- x$cue # make into a vector
 
 pp_prop <- d %>% 
   mutate(response = ifelse((cue_rt_mili < 200), NA, response)) %>% # cue response times quicker than 200 ms turned into NA
-  # group_by(participant) %>% 
-  # mutate(z_cue_rt_mili = (cue_rt_mili - mean(cue_rt_mili))/sd(cue_rt_mili), ## participant-wise rt z-scores
-  #        z_type_dur_mili = (type_dur_mili - mean(type_dur_mili))/sd(type_dur_mili)) %>% ## participant-wise typing z-scores
-  # mutate(response = ifelse((abs(z_cue_rt_mili) >= 2 & abs(z_type_dur_mili) >= 2), NA, response)) %>% ## changes responses with response times >= 2 z-scores from mean into NA
   mutate(response = na_if(response, 'idk')) %>% # replace idk with NA for counting
   group_by(cue, response) %>% 
   mutate(response = ifelse((response == cue), NA, response)) %>% 
