@@ -5,6 +5,7 @@ library(tidyr)
 library(ez)
 library(purrr)
 library(lme4)
+library(rstatix)
 library(lmerTest)
 library(codingMatrices)
 source("R/Load_Helpers.R")
@@ -68,6 +69,12 @@ d_long_filt_nonnormalized <- d_filt %>%
                names_to = "measure",
                values_to = "value") %>%
   drop_na()
+
+d_long_filt_nonnormalized %>% 
+  group_by(context, measure) %>% 
+  get_summary_stats(value, type = "common")
+
+
 
 lst_mods <- list(normalized = d_long_filt_normalized, nonnormal = d_long_filt_nonnormalized)
 
@@ -193,7 +200,8 @@ ggplot(aes(x = contrast, y = diff, color = Condition), data = cis) +
                                       "Lg10WF" = "Frequency")))+
   scale_color_discrete(labels = c("Load", "No Load"))+
   theme_bw(base_size = 18)+
-  labs( x = "Contrast")
+  labs( x = "Contrast",
+        y = "raw mean difference")
 ggsave("Figures/psychlong_contrasts.png", width = 12, height = 6)
 
 
