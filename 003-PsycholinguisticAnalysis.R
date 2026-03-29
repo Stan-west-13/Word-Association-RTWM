@@ -88,12 +88,12 @@ d_split <- map(lst_mods, function(x){
 mods <- imap(d_split, function(y,name){
   map(y, function(x){
     ## random intercepts for participants and cue
-    m_lmer <- lmer(value ~ condition * context + (1|cue) + (1|participant), data = x ) 
+    m_lmer <- lmer(value ~  context + (1|cue) + (1|participant), data = x ) 
     print(paste("############## Model output for ", unique(x$measure),name,"########################"))
     print(summary(m_lmer))
     
     contrasts(x$context) <- code_diff(4)
-    m_lmer_diff <- lmer(value ~ condition * context + (1|cue) + (1|participant), data = x ) 
+    m_lmer_diff <- lmer(value ~  context + (1|cue) + (1|participant), data = x ) 
     print(paste("############## Model output for ", unique(x$measure),name," DIFF ","########################"))
     print(summary(m_lmer_diff))
     
@@ -200,11 +200,27 @@ ggplot(aes(x = contrast, y = diff, color = Condition), data = cis) +
                                       "Lg10WF" = "Frequency")))+
   scale_color_discrete(labels = c("Load", "No Load"))+
   theme_bw(base_size = 18)+
-  labs( x = "Contrast",
-        y = "raw mean difference")
+  labs( x = "",
+        y = "raw mean difference (within-cue means)")
 ggsave("Figures/psychlong_contrasts.png", width = 12, height = 6)
 
 
+ggplot(aes(x = contrast, y = diff, color = Condition), data = cis %>% filter(!measure == "Lg10CD")) +
+  stat_summary(geom = "point", fun = "mean",size = 4,position = position_dodge(0.5))+
+  geom_errorbar(aes(ymin = CIL, ymax = CIU,width = 0),size = 2,position = position_dodge(0.5)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  facet_wrap(~measure,
+             nrow = 1,
+             ncol = 3, 
+             labeller = as_labeller(c("aoa" = "Age of Acquisition",
+                                      "nchar" = "Word Length",
+                                      "Lg10CD" = "Contextual Diversity",
+                                      "Lg10WF" = "Frequency")))+
+  scale_color_discrete(labels = c("Load", "No Load"))+
+  theme_bw(base_size = 18)+
+  labs( x = "",
+        y = "raw mean difference (within-cue means)")
+ggsave("Figures/psychlong_contrasts.png", width = 12, height = 6)
 
 
 
