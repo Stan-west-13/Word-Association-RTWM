@@ -25,10 +25,11 @@ d_filt <- d %>%
   group_by(participant) %>% 
   mutate(z_cue_rt_mili = (cue_rt_mili - mean(cue_rt_mili))/sd(cue_rt_mili), ## participant-wise rt z-scores
          z_type_dur_mili = (type_dur_mili - mean(type_dur_mili))/sd(type_dur_mili)) %>% ## participant-wise typing z-scores
-  filter(abs(z_cue_rt_mili) <= 2 & abs(z_type_dur_mili) <= 2) %>% ## removing response times > 2 z-scores from mean
+  filter(abs(z_cue_rt_mili) <= 3 & abs(z_type_dur_mili) <= 2) %>% ## removing response times > 2 z-scores from mean
   mutate(context = relevel(context,ref = "peer")) %>% ## set "child" as the reference
   ungroup() %>%
-  mutate(wf_z = z(Lg10WF),
+  mutate(nchar_lg10 = log10(nchar),
+         wf_z = z(Lg10WF),
          aoa_z = z(aoa),
          wl_z = z(nchar),
          cd_z = z(Lg10CD)) %>%
@@ -64,8 +65,9 @@ d_long_filt_nonnormalized <- d_filt %>%
          aoa,
          Lg10WF,
          Lg10CD,
-         nchar) %>%
-  pivot_longer(cols = c("aoa",starts_with("Lg"),"nchar"),
+         nchar,
+         nchar_lg10) %>%
+  pivot_longer(cols = c("aoa",starts_with("Lg"),"nchar","nchar_lg10"),
                names_to = "measure",
                values_to = "value") %>%
   drop_na()

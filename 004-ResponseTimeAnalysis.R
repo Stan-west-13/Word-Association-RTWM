@@ -93,6 +93,33 @@ glmer_plot_main <-  d %>%
   group_by(condition,context) %>%
   get_summary_stats(cue_rt_mili, type = c('mean_se'))
 
+## Plot max model marginals
+mm_rt <- read.csv('data/marginal_means_rt.csv') %>%
+  mutate(context = factor(context,levels = c("peer",'child','short','creative')))
+
+ggplot(aes(x = context, y = mean, fill = condition), data = mm_rt)+
+  geom_col(position =position_dodge(0.9))+
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                position = position_dodge(0.9),
+                width = 0.2)+
+  geom_text(stat = "identity",vjust = 7, aes(label = round(after_stat(y),2)),
+            position = position_dodge(0.9),size = 6)+
+  theme_bw(base_size = 24)+
+  theme(legend.position = c(0.6, 0.9),
+        legend.background = element_rect(fill = alpha("white", 0.2)),
+        legend.key = element_rect(fill = NA),
+        legend.text = element_text(size = 24),
+        legend.title = element_blank(),
+        legend.key.size = unit(0.3,"cm"),
+        axis.title.x = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        plot.background = element_rect(fill = "#FCFBFF"))+
+  scale_fill_discrete(labels = c("load","no load"))+
+  labs(y = "model marginal means (95% CI)")
+
+ggsave(filename = 'Figures/rt_plot_condition_context.png' ,width = 12, height = 6, dpi = 600, units = "in", device='png')
+
+
 ggplot(glmer_plot_main, aes(x = context, y = mean, fill = condition))+
   geom_col(position = "dodge")+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
