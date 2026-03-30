@@ -7,6 +7,7 @@ library(purrr)
 library(lme4)
 library(rstatix)
 library(lmerTest)
+library(emmeans)
 library(codingMatrices)
 source("R/Load_Helpers.R")
 
@@ -220,9 +221,12 @@ ggplot(aes(x = contrast, y = diff, color = Condition), data = cis %>% filter(!me
                                       "Lg10WF" = "Frequency")))+
   scale_color_discrete(labels = c("Load", "No Load"))+
   theme_bw(base_size = 18)+
+  theme(legend.title = element_blank(),
+        legend.position = c(0.85,0.2),
+        legend.text = element_text(size = 18))+
   labs( x = "",
         y = "raw mean difference (within-cue means)")
-ggsave("Figures/psychlong_contrasts.png", width = 12, height = 6)
+ggsave("Figures/psychlong_contrasts_nocd.png", width = 12, height = 8,units = "in",dpi=600,device = "png")
 
 
 

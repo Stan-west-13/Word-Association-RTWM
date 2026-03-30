@@ -81,7 +81,20 @@ x_count <- x %>%
   arrange(participant, block) %>%
   group_by(participant) %>%
   mutate(trialNum = seq.int(1,64,1)) %>%
-  filter(!participant == 225)
+  filter(!participant == 225) %>% 
+  group_by(participant,cue) %>% 
+  mutate(resp_iscue = response == cue) %>% 
+  mutate(prop_is_cue = sum(resp_iscue,na.rm = T)/n()) %>%
+  ungroup() %>%
+  arrange(desc(prop_is_cue)) %>%
+  filter(!prop_is_cue >= 0.5) ## Remove participants that responded with cue
+
+## participant counts
+x_count %>%
+  select(participant, context, counterbalance) %>%
+  unique() %>%
+  group_by(context,counterbalance) %>%
+  summarize(n())
 
 # Save out metadata df
 saveRDS(x_count, paste0("data/TTA_metadata_",Sys.Date(),".rds"))
