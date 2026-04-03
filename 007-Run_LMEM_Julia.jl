@@ -20,6 +20,13 @@ df.context = categorical(df.context)
 levels!(df.context, ["peer","child","short","creative"])
 levels!(df.condition, ["no_load","load"])
 ## Models
+
+## Response time LMEM
+m_rt = fit(MixedModel, 
+    @formula(cue_rt_mili ~ condition*context + (condition*context| cue) + (condition | participant)), 
+    df)
+outfun(m_rt, "data/m_rt.csv")
+## Psycholinguistic variables LMEMs
 m_aoa = fit(MixedModel, 
     @formula(aoa ~ condition*context + (condition*context| cue) + (condition | participant)), 
     df)
@@ -38,6 +45,12 @@ outfun(m_wl, "data/m_wl.csv")
 ## Models short ref
 levels!(df.context, ["short","child","peer","creative"])
 
+## Response time LMEM short ref
+m_rt_short = fit(MixedModel, 
+    @formula(cue_rt_mili ~ condition*context + (condition*context| cue) + (condition | participant)), 
+    df)
+outfun(m_rt_short, "data/m_rt_short.csv")
+
 m_aoa_short = fit(MixedModel, 
     @formula(aoa ~ condition*context + (condition*context| cue) + (condition | participant)), 
     df)
@@ -52,6 +65,11 @@ m_wl_short = fit(MixedModel,
     @formula(nchar_lg10 ~ condition*context + (condition*context| cue) + (condition | participant)), 
     df)
 outfun(m_wl_short, "data/m_wl_short.csv")
+
+
+
+
+
 ## Function for CI and marginal means
 marginal_meanConfint = function(model,df, measure, outfile)
 # --- Step 1: Extract fixed effects coefficients, design matrix, and covariance matrices 
@@ -91,3 +109,4 @@ end
 marginal_meanConfint(m_aoa, df,:aoa,"data/marginal_means_aoa.csv")
 marginal_meanConfint(m_wf, df,:Lg10WF,"data/marginal_means_wf.csv")
 marginal_meanConfint(m_wl, df,:nchar_lg10,"data/marginal_means_wl.csv")
+marginal_meanConfint(m_rt, df,:cue_rt_mili,"data/marginal_means_rt.csv")

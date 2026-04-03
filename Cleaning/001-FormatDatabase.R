@@ -116,7 +116,7 @@ response_map_table <- cues_responses_table %>%
   mutate(kuperman_id = ifelse(!is.na(kuperman_id.new),kuperman_id.new,kuperman_id),
          subtlex_id = ifelse(!is.na(subtlex_id.new),subtlex_id.new,subtlex_id)) %>%
   select(-kuperman_id.new,-subtlex_id.new) %>%
-  #filter(!(is.na(kuperman_id) & is.na(subtlex_id))) %>%
+  filter(!(is.na(kuperman_id) & is.na(subtlex_id))) %>%
   rename(cue_response_id = id) %>%
   mutate(revision = NA, researcher_id = NA, timestamp = now(), id = seq_len(n())) %>%
   select(id, cue_response_id, kuperman_id, subtlex_id, cue_id, revision, researcher_id, timestamp, -response)

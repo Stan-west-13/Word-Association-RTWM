@@ -41,8 +41,8 @@ dbSelectOneUnmappedCueResponse <- function(conn) {
   dbGetQuery(conn, '
     SELECT
       cr.id AS cue_response_id,
-      c.cue as cue,
-      r.response as response
+      c.cue AS cue,
+      r.response AS response
     FROM cues_responses AS cr
     LEFT JOIN cues AS c ON c.id = cr.cue_id
     LEFT JOIN responses AS r ON r.id = cr.response_id
