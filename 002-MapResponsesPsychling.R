@@ -5,6 +5,8 @@ library(lme4)
 library(lmerTest)
 library(statmod)
 library(tidyverse)
+library(DBI)
+library(RSQLite)
 library(rstatix)
 source("R/Load_Helpers.R")
 
@@ -42,5 +44,34 @@ response_psychling <- d %>%
   mutate(nchar = nchar(response)) %>% 
   group_by(cue) %>%
   filter(!response == cue)
+
+
+
+### Response Mapping from DB
+con <- dbConnect(RSQLite::SQLite(),"TTA2_WordAssociation-DB.db" )
+response_map <- dbGetQuery(con, "SELECT
+                                    rm.cue_response_id,
+                                    rm.kuperman_id,
+                                    rm.subtlex_id,
+                                    rm.revision,
+                                    cr.cue_id,
+                                    cr.response_id,
+                                    c.cue,
+                                    r.response,
+                                    sub.Lg10WF,
+                                    sub.Lg10CD,
+                                    k.aoa
+                                FROM response_map AS rm
+                                    LEFT JOIN cues_responses cr ON rm.cue_response_id = cr.id
+                                    LEFT JOIN cues c ON cr.cue_id = c.id
+                                    LEFT JOIN responses r ON cr.response_id = r.id
+                                    LEFT JOIN subtlex sub ON rm.subtlex_id = sub.id
+                                    LEFT JOIN kuperman k ON rm.kuperman_id = k.id")
+dbDisconnect(con)
+
+
+
 saveRDS(response_psychling,file = paste0("data/TTA2_response_mapped_meta-",Sys.Date(),".rds"))
+
+
 
